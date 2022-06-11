@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PoPWPSchema\Users\FieldResolvers\ObjectType;
 
+use PoP\GraphQLParser\Spec\Parser\Ast\FieldInterface;
+use PoP\ComponentModel\Component\Component;
 use PoP\ComponentModel\Feedback\ObjectTypeFieldResolutionFeedbackStore;
 use DateTime;
 use PoP\ComponentModel\FieldResolvers\ObjectType\AbstractQueryableObjectTypeFieldResolver;
@@ -12,7 +14,7 @@ use PoP\ComponentModel\TypeResolvers\ConcreteTypeResolverInterface;
 use PoP\ComponentModel\TypeResolvers\ObjectType\ObjectTypeResolverInterface;
 use PoPCMSSchema\SchemaCommons\Formatters\DateFormatterInterface;
 use PoP\ComponentModel\TypeResolvers\ScalarType\StringScalarTypeResolver;
-use PoPCMSSchema\SchemaCommons\ModuleProcessors\CommonFilterInputContainerModuleProcessor;
+use PoPCMSSchema\SchemaCommons\ComponentProcessors\CommonFilterInputContainerComponentProcessor;
 use PoPSchema\SchemaCommons\TypeResolvers\ScalarType\DateTimeScalarTypeResolver;
 use PoPCMSSchema\Users\TypeResolvers\ObjectType\UserObjectTypeResolver;
 use WP_User;
@@ -104,11 +106,11 @@ class UserObjectTypeFieldResolver extends AbstractQueryableObjectTypeFieldResolv
         };
     }
 
-    public function getFieldFilterInputContainerModule(ObjectTypeResolverInterface $objectTypeResolver, string $fieldName): ?array
+    public function getFieldFilterInputContainerComponent(ObjectTypeResolverInterface $objectTypeResolver, string $fieldName): ?Component
     {
         return match ($fieldName) {
-            'registeredDateStr' => [CommonFilterInputContainerModuleProcessor::class, CommonFilterInputContainerModuleProcessor::MODULE_FILTERINPUTCONTAINER_DATE_AS_STRING],
-            default => parent::getFieldFilterInputContainerModule($objectTypeResolver, $fieldName),
+            'registeredDateStr' => new Component(CommonFilterInputContainerComponentProcessor::class, CommonFilterInputContainerComponentProcessor::COMPONENT_FILTERINPUTCONTAINER_DATE_AS_STRING),
+            default => parent::getFieldFilterInputContainerComponent($objectTypeResolver, $fieldName),
         };
     }
 
@@ -125,6 +127,7 @@ class UserObjectTypeFieldResolver extends AbstractQueryableObjectTypeFieldResolv
         array $fieldArgs,
         array $variables,
         array $expressions,
+        FieldInterface $field,
         ObjectTypeFieldResolutionFeedbackStore $objectTypeFieldResolutionFeedbackStore,
         array $options = []
     ): mixed {
@@ -146,6 +149,6 @@ class UserObjectTypeFieldResolver extends AbstractQueryableObjectTypeFieldResolv
                 );
         }
 
-        return parent::resolveValue($objectTypeResolver, $object, $fieldName, $fieldArgs, $variables, $expressions, $objectTypeFieldResolutionFeedbackStore, $options);
+        return parent::resolveValue($objectTypeResolver, $object, $fieldName, $fieldArgs, $variables, $expressions, $field, $objectTypeFieldResolutionFeedbackStore, $options);
     }
 }
